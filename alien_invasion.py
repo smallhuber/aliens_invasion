@@ -2,7 +2,7 @@ import sys
 from time import sleep
 
 import pygame
-
+from pygame.sprite import Group
 from settings import Settings
 from game_stats import GameStats
 from scoreboard import Scoreboard
@@ -10,6 +10,8 @@ from button import Button
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from star import Star
+from random import randint
 
 
 class AlienInvasion:
@@ -33,8 +35,10 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.stars = pygame.sprite.Group()
 
         self._create_fleet()
+        self._create_stars()
 
         # Make the Play button.
         self.play_button = Button(self, "Play")
@@ -250,6 +254,32 @@ class AlienInvasion:
             self.play_button.draw_button()
 
         pygame.display.flip()
+
+    def _create_stars(self):
+        """ 创建星群 """
+        # 创建一个星星并计算一行可容纳多少个星星
+        star = Star(self)
+        star_width, star_height = star.rect.size
+        # 屏幕x方向左右各预留一个星星宽度
+        self.availiable_space_x = self.screen.get_rect().width - (2 * star_width)
+        # 星星的间距为星星宽度的4倍
+        number_stars_x = self.availiable_space_x // (5 * star_width) + 1
+        # 计算屏幕可容纳多少行星星
+        # 屏幕y方向上下各预留一个星星宽度
+        self.availiable_space_y = self.screen.get_rect().height - (2 * star_height)
+        number_rows = self.availiable_space_y // (5 * star_height) + 1
+        # 创建星群
+        for row_number in range(number_rows):
+            for star_number in range(number_stars_x):
+                self._create_star(star_number, row_number)
+
+    def _create_star(self, star_number, row_number):
+        star = Star(self)
+        star.rect.x = randint(0, self.availiable_space_x)
+        star.rect.y = randint(0, self.availiable_space_x)
+        self.stars.add(star)
+
+
 
 
 if __name__ == '__main__':
